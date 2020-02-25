@@ -1,6 +1,6 @@
 {
   "name": "monaco-docsy",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Docsy syntax highlighting for monaco-editor",
   "keywords": [],
   "homepage": "https://github.com/etienne-dldc/monaco-docsy#readme",
