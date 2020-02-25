@@ -1,0 +1,57 @@
+{
+  "name": "monaco-docsy",
+  "version": "0.0.0",
+  "description": "Docsy syntax highlighting for monaco-editor",
+  "keywords": [],
+  "homepage": "https://github.com/etienne-dldc/monaco-docsy#readme",
+  "bugs": {
+    "url": "https://github.com/etienne-dldc/monaco-docsy/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/etienne-dldc/monaco-docsy.git"
+  },
+  "license": "MIT",
+  "author": "Etienne Dldc",
+  "files": [
+    "dist",
+    "bin"
+  ],
+  "main": "dist/index.js",
+  "module": "dist/monaco-docsy.esm.js",
+  "typings": "dist/index.d.ts",
+  "directories": {
+    "example": "example",
+    "test": "test"
+  },
+  "scripts": {
+    "build": "tsdx build --target web",
+    "lint": "tsdx lint",
+    "pub": "yarn build && np",
+    "start": "tsdx watch",
+    "test": "tsdx test",
+    "test:watch": "tsdx test --watch"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "tsdx lint"
+    }
+  },
+  "prettier": {
+    "printWidth": 100,
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "es5"
+  },
+  "dependencies": {
+    "monaco-editor": "*"
+  },
+  "devDependencies": {
+    "@types/jest": "^25.1.3",
+    "husky": "^4.2.3",
+    "np": "^6.1.0",
+    "tsdx": "^0.12.3",
+    "tslib": "^1.10.0",
+    "typescript": "^3.7.5"
+  }
+}
