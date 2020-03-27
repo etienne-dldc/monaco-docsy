@@ -1,0 +1,19 @@
+{
+  "name": "example",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "generate": "parcel build node_modules/monaco-editor/esm/vs/editor/editor.worker.js --no-source-maps --out-dir static",
+    "start": "parcel index.html"
+  },
+  "keywords": [],
+  "author": "Etienne Dldc",
+  "license": "ISC",
+  "dependencies": {
+    "monaco-editor": "^0.20.0",
+    "parcel-bundler": "^1.12.4",
+    "parcel-plugin-static-files-copy": "^2.3.1",
+    "typescript": "^3.8.3"
+  }
+}

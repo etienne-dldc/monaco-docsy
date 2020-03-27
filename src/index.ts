@@ -18,38 +18,62 @@ export const DOCSY_MONARCH_TOKENS: languages.IMonarchLanguage = {
     root: [
       { include: 'comment' },
       { include: 'tag' },
+      { include: 'inject' },
       // text
-      [/[^<|/]+/, 'foo'],
-      [/[<|/]/, 'bar'],
+      [/[^<|/]+/, 'text'],
+      [/[<|/]/, 'text'],
     ],
     comment: [
       // line comment
-      [/([ \t\r]*)(\/\/.*)/, ['', 'comment']],
-      [/\/\*/, { token: 'comment', next: 'commentBlock' }],
+      [/([ \t\r]*)(\/\/.*)/, ['', 'comment.line']],
+      [/\/\*/, { token: 'comment.block', next: '@commentBlock' }],
     ],
     commentBlock: [
-      [/\*\//, { token: 'comment', next: '@pop' }],
-      [/[^*]+/, 'comment'],
-      [/[*]/, 'comment'],
+      [/\*\//, { token: 'comment.block', next: '@pop' }],
+      [/[^*]+/, 'comment.block'],
+      [/[*]/, 'comment.block'],
     ],
-    tag: [[/<\|[a-zA-Z][a-zA-Z0-9.]*/, { token: '@rematch', next: 'tagInner' }]],
+    inject: [[/(\{)/, { token: 'punctuation.bracket', next: '@expression' }]],
+    tag: [
+      [/<\|>/, { token: 'tag.fragment', next: '@children' }],
+      [/<#>/, { token: 'tag.rawfragment', next: '@rawFragmentChildren' }],
+      [/<\|[a-zA-Z][a-zA-Z0-9.]*/, { token: '@rematch', next: '@tagInner' }],
+      [/<#[a-zA-Z][a-zA-Z0-9.]*/, { token: '@rematch', next: '@tagRawInner' }],
+    ],
     tagInner: [
       // open with new line before props
       [
         /(<\|)([a-zA-Z][a-zA-Z0-9.]*)$/,
-        [{ token: 'delimiter.tag' }, { token: 'tag', switchTo: '@openingTag' }],
+        [{ token: 'delimiter.tag' }, { token: 'tag', switchTo: '@tagOpenning' }],
       ],
       // Open
       [
         /(<\|)([a-zA-Z][a-zA-Z0-9.]*)([ \t\r]*)/,
         [
           { token: 'delimiter.tag' },
-          { token: 'tag', log: 'Open $2' },
-          { token: '@rematch', switchTo: '@openingTag' },
+          { token: 'tag', log: 'Open $2 ($S0)' },
+          { token: '@rematch', switchTo: '@tagOpenning' },
         ],
       ],
     ],
-    openingTag: [
+    tagOpenning: [
+      { include: 'tagProps' },
+      // self closing tag
+      [
+        /([ \t\r]?)(\|>)/,
+        [{ token: '' }, { token: 'delimiter.tag', next: '@pop', log: 'SelfClose' }],
+      ],
+      // end of opening tag
+      [
+        />/,
+        {
+          token: 'delimiter.tag',
+          switchTo: '@children',
+          log: 'Children ($S0)',
+        },
+      ],
+    ],
+    tagProps: [
       // props with space before
       [
         /([ \t\r]+)([a-zA-Z][\w]*)(=)/,
@@ -62,10 +86,7 @@ export const DOCSY_MONARCH_TOKENS: languages.IMonarchLanguage = {
         [{ token: 'attribute.name', next: '@expression' }, { token: 'delimiter' }],
       ],
       [/^([a-zA-Z][\w]*)/, [{ token: 'attribute.name' }]],
-      // self closing tag
-      [/([ \t\r]+)(\|>)/, [{ token: '' }, { token: 'delimiter.tag', next: '@pop', log: 'Close' }]],
-      // end of opening tag
-      [/>/, { token: 'delimiter.tag', switchTo: '@children', log: 'Children $S0' }],
+      { include: 'comment' },
     ],
     children: [
       // named closing tag
@@ -79,6 +100,60 @@ export const DOCSY_MONARCH_TOKENS: languages.IMonarchLanguage = {
       ],
       // close
       [/(\|>)/, [{ token: 'delimiter.tag', next: '@pop', log: 'Close ($S0)' }]],
+      { include: 'root' },
+    ],
+    tagRawInner: [
+      // open with new line before props
+      [
+        /(<#)([a-zA-Z][a-zA-Z0-9.]*)$/,
+        [{ token: 'delimiter.tag' }, { token: 'tag', switchTo: '@tagRawOpenning' }],
+      ],
+      // Open
+      [
+        /(<#)([a-zA-Z][a-zA-Z0-9.]*)([ \t\r]*)/,
+        [
+          { token: 'delimiter.tag' },
+          { token: 'tag', log: 'Open Raw $2 ($S0)' },
+          { token: '@rematch', switchTo: '@tagRawOpenning' },
+        ],
+      ],
+    ],
+    tagRawOpenning: [
+      { include: 'tagProps' },
+      // end of opening tag
+      [
+        />/,
+        {
+          token: 'delimiter.tag',
+          switchTo: '@rawChildren',
+          log: 'Raw Children ($S0)',
+        },
+      ],
+    ],
+    rawChildren: [
+      // unraw
+      [/(<#>)/, [{ token: 'tag.unraw', next: '@unrawChildren', log: 'Start Unraw ($S0)' }]],
+      // named closing tag
+      [
+        /(<)([a-zA-Z][a-zA-Z0-9.]*)(#>)/,
+        [
+          { token: 'delimiter.tag' },
+          { token: 'tag' },
+          { token: 'delimiter.tag', next: '@pop', log: 'Close $2 ($S0) ' },
+        ],
+      ],
+      // close
+      [/(#>)/, [{ token: 'delimiter.tag', next: '@pop', log: 'Close ($S0)' }]],
+      // raw content
+      [/[^<#]+/, { token: 'raw' }],
+      [/[<#]/, { token: 'raw' }],
+    ],
+    rawFragmentChildren: [
+      [/<#>/, { token: 'tag', next: '@pop', log: 'Close raw ($S0)' }],
+      [/[^<]/, { token: 'raw' }],
+    ],
+    unrawChildren: [
+      [/<#>/, { token: 'tag.unrawclose', next: '@pop', log: 'End Unraw $S0' }],
       { include: 'root' },
     ],
     expression: [
