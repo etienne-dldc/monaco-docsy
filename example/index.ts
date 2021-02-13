@@ -1,5 +1,5 @@
 import * as monaco from 'monaco-editor';
-import { registerDocsy } from '../src';
+import { registerDocsyExpression } from '../src';
 
 if (!(window as any).MonacoEnvironment) {
   (window as any).MonacoEnvironment = {
@@ -103,7 +103,9 @@ bla bla bla
 <|Block theme=Theme.dark() /* foo=43 */ |>
 `;
 
-registerDocsy(monaco);
+content = '{ foo: "hello" }';
+
+registerDocsyExpression(monaco);
 
 monaco.editor.defineTheme('docsy-theme', {
   base: 'vs-dark',
@@ -126,7 +128,7 @@ monaco.editor.defineTheme('docsy-theme', {
 
 const editor = monaco.editor.create(document.getElementById('root')!, {
   value: content,
-  language: 'docsy',
+  language: 'docsy-expression',
   fontFamily: 'Fira Code',
   theme: 'docsy-theme',
   fontLigatures: true,

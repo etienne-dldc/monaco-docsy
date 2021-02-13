@@ -1,6 +1,6 @@
 import { languages } from 'monaco-editor';
 
-export const DOCSY_MONARCH_TOKENS: languages.IMonarchLanguage = {
+export const DOCSY_MONARCH_TOKENS_BASE: languages.IMonarchLanguage = {
   // defaultToken: 'invalid',
 
   // @ts-ignore
@@ -15,14 +15,6 @@ export const DOCSY_MONARCH_TOKENS: languages.IMonarchLanguage = {
   start: 'root',
 
   tokenizer: {
-    root: [
-      { include: 'comment' },
-      { include: 'tag' },
-      { include: 'inject' },
-      // text
-      [/[^<|/]+/, 'text'],
-      [/[<|/]/, 'text'],
-    ],
     comment: [
       // line comment
       [/([ \t\r]*)(\/\/.*)/, ['', 'comment.line']],
@@ -211,6 +203,45 @@ export const DOCSY_MONARCH_TOKENS: languages.IMonarchLanguage = {
   },
 };
 
+export const DOCSY_MONARCH_TOKENS_DOC: languages.IMonarchLanguage = {
+  ...DOCSY_MONARCH_TOKENS_BASE,
+  tokenizer: {
+    root: [
+      { include: 'comment' },
+      { include: 'tag' },
+      { include: 'inject' },
+      // text
+      [/[^<|/]+/, 'text'],
+      [/[<|/]/, 'text'],
+    ],
+    ...DOCSY_MONARCH_TOKENS_BASE.tokenizer,
+  },
+};
+
+export const DOCSY_MONARCH_TOKENS_EXP: languages.IMonarchLanguage = {
+  ...DOCSY_MONARCH_TOKENS_BASE,
+  tokenizer: {
+    root: [{ include: 'comment' }, { include: 'tag' }, { include: 'rootExpression' }],
+    rootExpression: [
+      [/{/, { token: 'delimiter', next: '@object' }],
+      [/\[/, { token: 'delimiter', next: '@array' }],
+      [/`/, { token: 'attribute.value', next: '@string' }],
+      // number
+      [/(-?)[\d]+(\.[\d]+)?/, { token: 'attribute.value' }],
+      [
+        /[a-zA-Z][a-zA-Z0-9_$]+/,
+        {
+          cases: {
+            '@keywords': { token: 'keyword' },
+            '@default': { token: 'identifier', next: '@identifier' },
+          },
+        },
+      ],
+    ],
+    ...DOCSY_MONARCH_TOKENS_BASE.tokenizer,
+  },
+};
+
 export const DOCSY_LANGUAGE_CONFIGURATION: languages.LanguageConfiguration = {
   comments: {
     lineComment: '//',
@@ -234,6 +265,14 @@ export const DOCSY_LANGUAGE_CONFIGURATION: languages.LanguageConfiguration = {
 
 export function registerDocsy(monaco: typeof import('monaco-editor')) {
   monaco.languages.register({ id: 'docsy' });
-  monaco.languages.setMonarchTokensProvider('docsy', DOCSY_MONARCH_TOKENS);
+  monaco.languages.setMonarchTokensProvider('docsy', DOCSY_MONARCH_TOKENS_DOC);
   monaco.languages.setLanguageConfiguration('docsy', DOCSY_LANGUAGE_CONFIGURATION);
+}
+
+export function registerDocsyExpression(monaco: typeof import('monaco-editor')) {
+  console.log(DOCSY_MONARCH_TOKENS_EXP);
+
+  monaco.languages.register({ id: 'docsy-expression' });
+  monaco.languages.setMonarchTokensProvider('docsy-expression', DOCSY_MONARCH_TOKENS_EXP);
+  monaco.languages.setLanguageConfiguration('docsy-expression', DOCSY_LANGUAGE_CONFIGURATION);
 }
