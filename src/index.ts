@@ -270,8 +270,6 @@ export function registerDocsy(monaco: typeof import('monaco-editor')) {
 }
 
 export function registerDocsyExpression(monaco: typeof import('monaco-editor')) {
-  console.log(DOCSY_MONARCH_TOKENS_EXP);
-
   monaco.languages.register({ id: 'docsy-expression' });
   monaco.languages.setMonarchTokensProvider('docsy-expression', DOCSY_MONARCH_TOKENS_EXP);
   monaco.languages.setLanguageConfiguration('docsy-expression', DOCSY_LANGUAGE_CONFIGURATION);
